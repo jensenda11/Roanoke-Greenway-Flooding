@@ -11,20 +11,34 @@ by accessing online usgs stream gauge data, so an internet connection is require
 for this script to run. Have a good bike ride! 
 """
 
+""
 
+#This python script will compare the current height of the Roanoke River with the
+#height of the lowest bridge on the Roanoke River greenway. River height is obtained
+#by accessing online usgs stream gauge data, so an internet connection is required
+#for this script to run. Have a good bike ride! 
+
+#Import requests and datetime
 import requests
+from datetime import datetime
 
-#get most recently updated text from the usgs river gauge site
-url_txt = "https://waterdata.usgs.gov/va/nwis/uv?site_no=02055000"
+#Get date to put together url string with most recent stream gauge data
+date_now = datetime.now()
+date_string = date_now.strftime("%Y-%m-%d")
+time_string1 = date_now.strftime("%H:%M:%S")
+time_string0 = str(int(time_string1[0:2])-1) + time_string1[2:len(time_string1)]
+
+#get all the text from the usgs river gauge site
+url_txt = "https://waterservices.usgs.gov/nwis/iv/?sites=02055000&parameterCd=00065&startDT="+date_string+"T"+time_string0+".000-04:00&endDT="+date_string+"T"+time_string1+".781-04:00&siteStatus=all&format=rdb"
 res = requests.get(url_txt)
 html_page = str(res.content)
 
 #Split the text down to the river height and convert to float
-html_split = html_page.split('recent instantaneous')
-html_select = html_split[2]
-height = float(html_select[7:13])
+html_split = html_page.split('\\')
+html_select = html_split[-3]
+height = float(html_select[1:len(html_select)])
 
-#Create strings for print results
+#Create strings for script results
 str_intro = "Greenway conditions are "
 str_flood = "FLOODED. "
 str_maybe = "MAYBE flooded. "
@@ -45,6 +59,4 @@ elif height < 3.2 and height >= 3.0:
     print(print_maybe)
 else:
     print(print_no)
-
-
 
